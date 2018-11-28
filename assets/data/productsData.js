@@ -33,7 +33,8 @@ function getProductDetails(id) {
         }
 
         console.table(results);
-    })
+    });
+    connection.end();
 }
 
 module.exports = {
