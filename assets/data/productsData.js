@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-const Prompts = require('./../../prompts.js');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -8,8 +7,7 @@ const connection = mysql.createConnection({
     database: 'bamazon'
 });
 
-function getAllProductsDetails() {
-    connection.connect();
+function getAllProductsDetails(callback) {
     let query = 'SELECT * FROM products;';
     connection.query(query, (error, results) => {
         if (error) {
@@ -17,14 +15,14 @@ function getAllProductsDetails() {
             return;
         }
     
+        
         console.table(results);
-        Prompts.purchasePrompt(results);
+        callback(results);
     });
-    connection.end();
+    
 }
 
-function getProductDetails(id) {
-    connection.connect();
+function getProductDetails(id, callback) {
     let query = 'SELECT * FROM products WHERE item_id = ?';
     connection.query(query, id, (error, results) => {
         if(error) {
@@ -33,11 +31,32 @@ function getProductDetails(id) {
         }
 
         console.table(results);
+        callback(id, results);
     });
-    connection.end();
+}
+
+function checkItemStock(amount, id, callback) {
+    let query = 'SELECT price, stock_quantity FROM products WHERE item_id = ?';
+    connection.query(query, id, (error, results) => {
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+
+        if(amount > results[0].stock_quantity) {
+            console.log('Cannot buy more items than are in stock.');
+        } else if (amount <= 0) {
+            console.log('Amount must be greater than 0.');
+        }else {
+            console.log('Purchasing item. Your total is $' + (amount*results[0].price) );
+        }
+        connection.end();
+    })
 }
 
 module.exports = {
     getAllProductsDetails: getAllProductsDetails,
-    getProductDetails: getProductDetails
+    getProductDetails: getProductDetails,
+    checkItemStock: checkItemStock
 }

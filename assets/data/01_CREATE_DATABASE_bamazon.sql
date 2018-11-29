@@ -3,8 +3,6 @@ DROP DATABASE IF EXISTS bamazon;
 CREATE DATABASE bamazon;
 USE bamazon;
 
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-
 -- Create products table to hold purchasable items (if in stock)
 CREATE TABLE products (
 	item_id INT AUTO_INCREMENT NOT NULL,

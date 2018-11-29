@@ -1,13 +1,9 @@
 const Inquirer = require('inquirer');
-const Products = require('./assets/data/productsData');
-
-var getDetails = Products.getProductDetails;
+const Products = require('./assets/data/productsData.js');
 
 function purchasePrompt(products) {
-    console.log(products);
     let ids = products.map(e => e.item_id.toString());
-    console.log(ids);
-
+    //console.log(Products);
     Inquirer.prompt([
         {
             type: 'input',
@@ -17,12 +13,26 @@ function purchasePrompt(products) {
         }
     ])
     .then((answers) => {
-        console.log(answers.productId + ' chosen');
-        console.log(Products, this, getDetails);
-        Products.getProductDetails(answers.productId);
+        Products.getProductDetails(answers.productId, unitPurchasePrompt);
     });
 }
 
+function unitPurchasePrompt(id) {
+    Inquirer.prompt([
+        {
+            type: 'input',
+            message: 'How many units would you like to buy.',
+            name: 'purchaseAmount',
+            validate: input => parseInt(input) ? true : 'Must be an integer.'
+        }
+    ])
+    .then((answers) => {
+        let amount = parseInt(answers.purchaseAmount);
+        Products.checkItemStock(amount, id);
+    })
+}
+
 module.exports = {
-    purchasePrompt: purchasePrompt
+    purchasePrompt: purchasePrompt,
+    unitPurchasePrompt: unitPurchasePrompt
 }
