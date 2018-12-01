@@ -1,15 +1,18 @@
 const mysql = require('mysql');
 
-let createConnection = mysql.createConnection({
+let connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'root',
     database: 'bamazon'
 });
 
-let endConnection = createConnection.end();
+
+function closeConnection () {
+    connection.end();
+}
 
 module.exports = {
-    createConnection: createConnection,
-    endConnection: endConnection
+    closeConnection: closeConnection,
+    connection
 }
