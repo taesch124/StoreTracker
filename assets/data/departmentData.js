@@ -3,6 +3,7 @@ const DB = require('./database');
 
 const connection = DB.connection;
 
+
 function getDepartmentDetails(callback) {
     let query = `SELECT department_id,
     department_name

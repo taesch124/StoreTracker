@@ -140,6 +140,7 @@ function mainMenu(results) {
                 break;
             case 'Login Again':
                 currentAccount = undefined;
+                loginAttempts = 0;
                 login();
                 break;
             case 'Quit':
@@ -179,7 +180,6 @@ function customerMenu(results) {
 
 function purchasePrompt(products) {
     let ids = products.map(e => e.item_id.toString());
-    //console.log(Products);
     Inquirer.prompt([
         {
             type: 'input',
@@ -259,8 +259,8 @@ function managerMenu(results) {
     })
 }
 
-function addInventoryPrompt(departments) {
-    let ids = departments.map(e => e.item_id.toString());
+function addInventoryPrompt(products) {
+    let ids = products.map(e => e.item_id.toString());
     //console.log(Products);
     Inquirer.prompt([
         {
@@ -281,9 +281,8 @@ function addInventoryPrompt(departments) {
     });
 }
 
-function addNewProductPrompt(products) {
-    let departments = products.map(e => e.department_id.toString());
-    console.log(departments);
+function addNewProductPrompt(departments) {
+    let departmentNames = departments.map(e => e.department_name.toString());
     Inquirer.prompt([
         {
             type: 'input',
@@ -293,9 +292,9 @@ function addNewProductPrompt(products) {
         {
             type: 'list', 
             message: 'Choose department id:',
-            choices: departments,
+            choices: departmentNames,
             name: 'department',
-            validate: input => departments.includes(input) ? true : 'Please pick a valid department'
+            validate: input => departmentNames.includes(input) ? true : 'Please pick a valid department'
         },
         {
             type: 'input',
@@ -309,14 +308,18 @@ function addNewProductPrompt(products) {
             name: 'stock',
             validate: input => parseInt(input) > 0 ? true : 'Enter an integer greater than 0'
         }
-    ]).then(answers => {
-        console.log(answers);
-        Products.addNewProduct(answers.name,
-            parseInt(answers.department),
-            answers.price,
-            answers.stock,
-            managerMenu);
-        });
+    ])
+    .then(answers => {
+        let departmentInfo = {department_name: answers.department};
+        let product = {
+            product_name: answers.name,
+            department_id: null,
+            price: answers.price,
+            stock_quantity: answers.stock,
+            product_sales: 0
+        };
+        Products.addNewProduct(product, departmentInfo.department_name, managerMenu);
+    });
 }
 
 function supervisorMenu(results) {
@@ -346,7 +349,7 @@ function supervisorMenu(results) {
             default:
                 break;
         }
-    })
+    });
 }
 
 function addNewDepartment(departments) {

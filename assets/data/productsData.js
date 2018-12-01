@@ -112,15 +112,12 @@ function updateProductStock(id, stock, callback) {
             console.error(error);
             return;
         }
-        console.log(result);
         let query = 'UPDATE products SET ? WHERE ?';
         let set = {stock_quantity: result[0].stock_quantity + stock};
         let sales = result.product_sales;
         if(stock < 0) {
-            console.log(sales);
             set.product_sales = result[0].product_sales + Math.abs(stock);
         }
-        console.log(set);
         let where = {item_id:id};
 
         connection.query(query, [set, where], (error, results) => {
@@ -161,24 +158,37 @@ function checkItemStock(id, stock, callback) {
     });
 }
 
-function addNewProduct(name, department, price, stock, callback) {
-    let query = 'INSERT INTO products SET ?';
-    let set = {
-        product_name: name,
-        department_id: department,
-        price: price,
-        stock_quantity: stock,
-        product_sales: 0
-    };
-    connection.query(query, set, (error, result) => {
+function addNewProduct(product, departmentName, callback) {
+    let query = `SELECT department_id FROM departments WHERE department_name = ?`;
+    let where = departmentName;
+    connection.query(query, where, (error, results) => {
         if (error) {
             console.error(error);
             return;
         }
 
-        console.log(name + ' entered into database.');
-        if(callback) callback(result);
+        if(results.length === 0) {
+            console.log('No results found');
+            return;
+        }
+        else if(results.length === 1) {
+            product.department_id = results[0].department_id;
+            let query = 'INSERT INTO products SET ?';
+            connection.query(query, product, (error, result) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                console.log(result[0].name + ' entered into database.');
+                if(callback) callback(result);
+            });
+        } else {
+            console.log('More than one department found.');
+            return;
+        }
     });
+    
 }
 
 
