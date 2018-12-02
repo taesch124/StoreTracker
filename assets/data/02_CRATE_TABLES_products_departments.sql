@@ -1,9 +1,5 @@
-DROP DATABASE IF EXISTS bamazon;
-
-CREATE DATABASE bamazon;
 USE bamazon;
 
--- Create departments table
 CREATE TABLE departments (
 	department_id INT AUTO_INCREMENT NOT NULL,
     department_name VARCHAR(50) NOT NULL,

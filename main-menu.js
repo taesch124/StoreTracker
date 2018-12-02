@@ -1,4 +1,5 @@
 const cTable = require('console.table');
 const Prompts = require('./prompts.js');
+const User = require('./assets/data/userData');
 
-Prompts.accountPrompt();
+User.createSuperUserIfNotExists(Prompts.accountPrompt);

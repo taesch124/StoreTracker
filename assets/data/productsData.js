@@ -1,14 +1,15 @@
 const mysql = require('mysql');
 const DB = require('./database');
+const Cart = require('./cartData');
 
 const connection = DB.connection;
 
 function getAllProductsCustomer(callback) {
-    let query = `SELECT P.item_id,
-    P.product_name,
-    D.department_name,
-    P.price,
-    P.stock_quantity
+    let query = `SELECT P.item_id AS ID,
+    P.product_name AS Name,
+    D.department_name AS Department,
+    P.price AS Price,
+    P.stock_quantity AS Stock
     FROM products P
     INNER JOIN departments D
     ON P.department_id = D.department_id;`;
@@ -27,7 +28,6 @@ function getAllProductsCustomer(callback) {
 function getAllProductsManager(callback) {
     let query = `SELECT P.item_id,
     P.product_name,
-    D.department_id,
     D.department_name,
     P.price,
     P.stock_quantity,
@@ -71,11 +71,9 @@ function getAllProductsDetailsNoLog(callback) {
 function getLowInventory(callback) {
     let query = `SELECT P.item_id,
     P.product_name,
-    D.department_id,
     D.department_name,
     P.price,
-    P.stock_quantity,
-    P.product_sales
+    P.stock_quantity
     FROM products P
     INNER JOIN departments D
     ON P.department_id = D.department_id
@@ -132,7 +130,7 @@ function updateProductStock(id, stock, callback) {
     
 }
 
-function checkItemStock(id, stock, callback) {
+async function checkItemStock(currentAccount, id, stock, callback) {
     let query = 'SELECT product_name, price, stock_quantity FROM products WHERE item_id = ?';
     connection.query(query, id, (error, results) => {
         if (error) {
@@ -142,11 +140,12 @@ function checkItemStock(id, stock, callback) {
         let product = results[0];
 
         if(stock < 0) {
-            if( (-1 * stock) > product.stock_quantity) {
+            if( Math.abs(stock) > product.stock_quantity) {
                 console.log('Cannot buy more items than are in stock.');
                 callback();
             } else {
-                console.log('Purchasing ' + product.product_name + '(s). Your total is $' + (-1 * stock * product.price).toFixed(2) );
+                console.log('Purchasing ' + product.product_name + '(s). Your total is $' + (Math.abs(stock) * product.price).toFixed(2) );
+                Cart.addProductToCart(currentAccount, {item_id: id}, Math.abs(stock));
                 updateProductStock(id, stock, callback);
             }
         } else {
@@ -180,7 +179,7 @@ function addNewProduct(product, departmentName, callback) {
                     return;
                 }
 
-                console.log(result[0].name + ' entered into database.');
+                console.log(product.peoduct_name + ' entered into database.');
                 if(callback) callback(result);
             });
         } else {

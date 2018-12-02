@@ -3,6 +3,7 @@ const DB = require('./assets/data/database');
 const Users = require('./assets/data/userData');
 const Products = require('./assets/data/productsData');
 const Departments = require('./assets/data/departmentData');
+const Cart = require('./assets/data/cartData');
 
 var loginAttempts = 0;
 var currentAccount;
@@ -158,6 +159,8 @@ function customerMenu(results) {
         message: 'Choose an option:',
         choices: [ 'View Products',
                     'Purchase Product',
+                    'View Cart',
+                    'Checkout',
                     'Back'],
         name: 'managerAction'
     }])
@@ -170,6 +173,12 @@ function customerMenu(results) {
             case 'Purchase Product':
                 Products.getAllProductsCustomer(purchasePrompt);
                 break;
+            case 'View Cart':
+                Cart.getUserCart(currentAccount, customerMenu);
+                break;
+            case 'Checkout':
+                Cart.getCartTotal(currentAccount, checkoutConfirm, customerMenu);
+                break;
             case 'Back':
                 mainMenu();
             default:
@@ -179,7 +188,7 @@ function customerMenu(results) {
 }
 
 function purchasePrompt(products) {
-    let ids = products.map(e => e.item_id.toString());
+    let ids = products.map(e => e.ID.toString());
     Inquirer.prompt([
         {
             type: 'input',
@@ -204,7 +213,7 @@ function unitPurchasePrompt(id) {
     ])
     .then((answers) => {
         let amount = parseInt(answers.purchaseAmount);
-        Products.checkItemStock(id, -amount, purchaseAgainPrompt);
+        Products.checkItemStock(currentAccount, id, -amount, purchaseAgainPrompt);
     })
 }
 
@@ -223,6 +232,23 @@ function purchaseAgainPrompt() {
             customerMenu();
         }
     })
+}
+
+function checkoutConfirm() {
+    Inquirer.prompt([
+        {
+            type: 'confirm',
+            message: 'Would you like to checkout: ',
+            name: 'checkout'
+        }
+    ])
+    .then(answers => {
+        if(answers.checkout) {
+            Cart.emptyCartByUser(currentAccount, customerMenu);
+        } else {
+            customerMenu();
+        }
+    });
 }
 
 function managerMenu(results) {
@@ -277,7 +303,7 @@ function addInventoryPrompt(products) {
         }
     ])
     .then((answers) => {
-        Products.checkItemStock(answers.productId, parseInt(answers.addAmount), managerMenu);
+        Products.checkItemStock(currentAccount, answers.productId, parseInt(answers.addAmount), managerMenu);
     });
 }
 

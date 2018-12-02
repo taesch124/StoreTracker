@@ -42,7 +42,7 @@ function getProductSalesByDepartment(callback) {
     let query = `SELECT D.department_id,
     D.department_name,
     D.over_head_costs,
-    COALESCE(P.product_sales, 0),
+    COALESCE(P.product_sales, 0) AS product_sales,
     COALESCE(P.product_sales, 0) - D.over_head_costs AS total_profit
     FROM departments D
     LEFT OUTER JOIN (SELECT DP.department_id,
