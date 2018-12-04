@@ -51,7 +51,7 @@ function login() {
             name: 'username'
         },
         {
-            type: 'input',
+            type: 'password',
             message: 'Enter password: ',
             name: 'password'
         }
@@ -71,7 +71,7 @@ function createAccount() {
             name: 'username'
         },
         {
-            type: 'input',
+            type: 'password',
             message: 'Enter password',
             name: 'password'
         },
@@ -244,7 +244,7 @@ function checkoutConfirm() {
     ])
     .then(answers => {
         if(answers.checkout) {
-            Cart.emptyCartByUser(currentAccount, customerMenu);
+            Products.updateProductsOnCheckout(currentAccount, customerMenu);
         } else {
             customerMenu();
         }

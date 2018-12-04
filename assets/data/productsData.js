@@ -130,6 +130,23 @@ function updateProductStock(id, stock, callback) {
     
 }
 
+function updateProductsOnCheckout(user, callback) {
+    let update = `UPDATE products P
+    INNER JOIN cart C
+    ON P.item_id = C.item_id
+    SET P.stock_quantity = (P.stock_quantity - C.quantity),
+    P.product_sales = (P.product_sales + C.quantity)
+    WHERE P.item_id = C.item_id;`;
+    connection.query(update, (error, results) => {
+        if(error) {
+            console.error(error);
+            return;
+        }
+
+        Cart.emptyCartByUser(user, callback);
+    });
+}
+
 async function checkItemStock(currentAccount, id, stock, callback) {
     let query = 'SELECT product_name, price, stock_quantity FROM products WHERE item_id = ?';
     connection.query(query, id, (error, results) => {
@@ -145,8 +162,7 @@ async function checkItemStock(currentAccount, id, stock, callback) {
                 callback();
             } else {
                 console.log('Purchasing ' + product.product_name + '(s). Your total is $' + (Math.abs(stock) * product.price).toFixed(2) );
-                Cart.addProductToCart(currentAccount, {item_id: id}, Math.abs(stock));
-                updateProductStock(id, stock, callback);
+                Cart.addProductToCart(currentAccount, {item_id: id}, Math.abs(stock), callback);
             }
         } else {
             console.log('Adding ' + stock + ' units to inventory.');
@@ -203,6 +219,7 @@ module.exports = {
     getProductDetails: getProductDetails,
     checkItemStock: checkItemStock,
     updateProductStock: updateProductStock,
+    updateProductsOnCheckout: updateProductsOnCheckout,
     addNewProduct: addNewProduct,
     closeConnection: closeConnection
 };

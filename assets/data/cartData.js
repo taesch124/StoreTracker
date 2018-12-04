@@ -81,7 +81,7 @@ function emptyCartByUser(user, callback) {
         }
 
         console.log(user.username + '\'s cart has been emptied.');
-        if(callback) callback(results);
+        if (callback) callback(results);
     })
 }
 

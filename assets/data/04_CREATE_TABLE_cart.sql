@@ -12,4 +12,4 @@ CREATE TABLE cart (
 
 INSERT INTO cart
 VALUES (1,1,2),
-(1,14,5);
+(1,5,5);
